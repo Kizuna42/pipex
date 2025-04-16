@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/12 16:01:16 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 19:13:09 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 19:29:36 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	usage(void)
 	ft_putstr_fd("Ex: ./pipex <file1> <cmd1> <cmd2> <...> <file2>\n", 1);
 	ft_putstr_fd("    ./pipex \"here_doc\" <LIMITER> <cmd> <cmd1> <...> ", 1);
 	ft_putstr_fd("<file>\n", 1);
-	exit(EXIT_SUCCESS);
+	exit(EXIT_FAILURE);
 }
 
 /* Function to open the files with the right flags */
@@ -41,6 +41,7 @@ int	open_file(char *argv, int i)
 			file = open("/dev/null", O_WRONLY);
 		else
 			file = open("/dev/null", O_RDONLY);
+		return (-1);
 	}
 	return (file);
 }

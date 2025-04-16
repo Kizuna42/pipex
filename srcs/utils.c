@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/08/04 10:26:01 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 19:07:42 by kizuna           ###   ########.fr       */
+/*   Created: 2021/08/02 09:54:19 by gcollet           #+#    #+#             */
+/*   Updated: 2025/04/16 19:22:27 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,9 +70,9 @@ void	execute(char *argv, char **envp)
 		while (cmd[++i])
 			free(cmd[i]);
 		free(cmd);
-		ft_putstr_fd("Error: command not found: ", 2);
+		ft_putstr_fd("\033[31mCommand not found: ", 2);
 		ft_putstr_fd(cmd_name, 2);
-		ft_putstr_fd("\n", 2);
+		ft_putstr_fd("\n\e[0m", 2);
 		free(cmd_name);
 		exit(127);
 	}

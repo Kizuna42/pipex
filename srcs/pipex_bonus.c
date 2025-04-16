@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2021/08/05 10:33:51 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 19:16:21 by kizuna           ###   ########.fr       */
+/*   Created: 2021/08/12 15:04:26 by gcollet           #+#    #+#             */
+/*   Updated: 2025/04/16 19:29:36 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,48 +83,56 @@ void	here_doc(char *limiter, int argc)
 	}
 }
 
-/* Process input arguments and setup file descriptors */
-void	setup_files(int argc, char **argv, int *fileout, int *i)
+/* Function to setup the files (output & input) and heredoc if necessary */
+int	setup_files(int argc, char **argv, int *i)
 {
-	int	filein;
+	int	had_error;
+	int	output_file;
 
-	if (ft_strncmp(argv[1], "here_doc", 8) == 0)
+	had_error = 0;
+	if (ft_strncmp("here_doc", argv[1], 8) == 0)
 	{
 		*i = 3;
-		*fileout = open(argv[argc - 1], O_WRONLY | O_CREAT | O_APPEND, 0777);
-		if (*fileout == -1)
-		{
-			perror("\033[31mError");
-			*fileout = open("/dev/null", O_WRONLY);
-		}
+		output_file = open_file(argv[argc - 1], 0);
+		if (output_file == -1)
+			had_error = 1;
 		here_doc(argv[2], argc);
 	}
 	else
 	{
 		*i = 2;
-		*fileout = open_file(argv[argc - 1], 1);
-		filein = open_file(argv[1], 2);
-		dup2(filein, STDIN_FILENO);
-		close(filein);
+		output_file = open_file(argv[argc - 1], 1);
+		if (output_file == -1)
+			had_error = 1;
+		dup2(open_file(argv[1], 2), STDIN_FILENO);
 	}
+	dup2(output_file, STDOUT_FILENO);
+	return (had_error);
 }
 
-/* Main function to process commands with pipes */
+/* Main Function */
 int	main(int argc, char **argv, char **envp)
 {
 	int	i;
-	int	fileout;
+	int	file_result;
+	int	status;
+	int	last_pid;
 
 	if (argc >= 5)
 	{
-		setup_files(argc, argv, &fileout, &i);
+		file_result = setup_files(argc, argv, &i);
 		while (i < argc - 2)
 			child_process(argv[i++], envp);
-		dup2(fileout, STDOUT_FILENO);
-		close(fileout);
-		execute(argv[argc - 2], envp);
+		last_pid = fork();
+		if (last_pid == 0)
+			execute(argv[i], envp);
+		waitpid(last_pid, &status, 0);
+		if (WIFEXITED(status))
+			return (WEXITSTATUS(status));
+		if (file_result)
+			return (EXIT_FAILURE);
+		return (EXIT_SUCCESS);
 	}
-	else
-		usage();
-	return (0);
+	usage();
+	return (EXIT_FAILURE);
 }
