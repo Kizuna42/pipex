@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 04:25:03 by kizuna            #+#    #+#             */
-/*   Updated: 2025/04/16 16:07:34 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 17:07:32 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,11 +71,7 @@ static void	prepare_command(t_pipex *pipex, char **cmd_splits)
 		close(pipex->pipes[i][1]);
 		i++;
 	}
-	if (pipex->infile > 0)
-		close(pipex->infile);
-	if (pipex->outfile > 0)
-		close(pipex->outfile);
-	if (!cmd_splits)
+	if (!cmd_splits || !cmd_splits[0])
 		exit(EXIT_FAILURE);
 }
 

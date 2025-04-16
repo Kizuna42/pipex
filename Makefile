@@ -6,7 +6,7 @@
 #    By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/16 04:25:03 by kizuna            #+#    #+#              #
-#    Updated: 2025/04/16 16:39:47 by kizuna           ###   ########.fr        #
+#    Updated: 2025/04/16 17:13:02 by kizuna           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -16,22 +16,25 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
 SRCS = src/main.c \
-	   src/pipex_utils.c \
-	   src/pipex_init.c \
-	   src/pipex_path.c \
-	   src/processes.c \
-	   src/pipex_pipes.c \
-	   src/pipex_heredoc.c
+		src/pipex_utils.c \
+		src/pipex_init.c \
+		src/pipex_files.c \
+		src/pipex_path.c \
+		src/processes.c \
+		src/pipex_pipes.c \
+		src/pipex_heredoc.c \
+		src/pipex_dir_utils.c
 
 BONUS_SRCS = src/main.c \
-	   src/pipex_utils.c \
-	   src/pipex_files.c \
-	   src/pipex_path.c \
-	   src/processes.c \
-	   src/pipex_bonus_utils.c \
-	   src/pipex_bonus_heredoc.c \
-	   src/pipex_init_bonus.c \
-	   src/pipex_pipes.c
+		src/pipex_utils.c \
+		src/pipex_files.c \
+		src/pipex_path.c \
+		src/processes.c \
+		src/pipex_bonus_utils.c \
+		src/pipex_bonus_heredoc.c \
+		src/pipex_init_bonus.c \
+		src/pipex_pipes.c \
+		src/pipex_dir_utils.c
 
 OBJS = $(SRCS:.c=.o)
 BONUS_OBJS = $(BONUS_SRCS:.c=.o)
@@ -54,7 +57,7 @@ $(LIBFT):
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJS) $(BONUS_OBJS)
+	rm -f $(OBJS) $(BONUS_OBJS) bonus
 	make -C $(LIBFT_DIR) clean
 
 fclean: clean

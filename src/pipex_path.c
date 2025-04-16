@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 04:25:03 by kizuna            #+#    #+#             */
-/*   Updated: 2025/04/16 16:08:03 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 17:18:35 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,17 +53,22 @@ char	*find_path(char *cmd, char **envp)
 	char	**paths;
 	char	*env_path;
 	char	*cmd_path;
-	char	*cmd_name;
+	char	**cmd_parts;
 
 	if (!cmd || !*cmd)
 		return (NULL);
-	cmd_name = ft_split(cmd, ' ')[0];
+	cmd_parts = ft_split(cmd, ' ');
+	if (!cmd_parts)
+		return (NULL);
 	env_path = get_env_path(envp);
 	if (!env_path)
+	{
+		free_array(cmd_parts);
 		return (NULL);
+	}
 	paths = ft_split(env_path, ':');
-	cmd_path = get_cmd_path(cmd_name, paths);
-	free(cmd_name);
+	cmd_path = get_cmd_path(cmd_parts[0], paths);
+	free_array(cmd_parts);
 	free_array(paths);
 	return (cmd_path);
 }

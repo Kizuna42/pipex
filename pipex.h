@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 04:25:03 by kizuna            #+#    #+#             */
-/*   Updated: 2025/04/16 16:07:10 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 17:13:02 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 # include <stdlib.h>
 # include <fcntl.h>
 # include <sys/wait.h>
+# include <sys/stat.h>
 # include <errno.h>
 # include "libft/libft.h"
 
@@ -56,5 +57,6 @@ void	close_all_pipes(t_pipex *pipex);
 void	wait_all_children(t_pipex *pipex);
 void	open_files(t_pipex *pipex, char **argv, int argc);
 int		is_limiter(char *line, char *limiter);
+void	create_output_dir(char *outfile_path);
 
 #endif

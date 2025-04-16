@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 04:25:03 by kizuna            #+#    #+#             */
-/*   Updated: 2025/04/16 16:02:53 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 17:12:15 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,5 +82,8 @@ void	free_pipex(t_pipex *pipex)
 	if (pipex->infile > 0)
 		close(pipex->infile);
 	if (pipex->outfile > 0)
+	{
 		close(pipex->outfile);
+	}
+	sync();
 }
