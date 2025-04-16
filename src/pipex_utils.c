@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 04:25:03 by kizuna            #+#    #+#             */
-/*   Updated: 2025/04/16 15:50:46 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 16:02:53 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,15 @@ void	error_exit(char *message)
 
 void	close_pipes(t_pipex *pipex)
 {
-	close(pipex->pipe_fd[0]);
-	close(pipex->pipe_fd[1]);
+	int	i;
+
+	i = 0;
+	while (i < pipex->pipe_count)
+	{
+		close(pipex->pipes[i][0]);
+		close(pipex->pipes[i][1]);
+		i++;
+	}
 }
 
 void	free_array(char **array)
@@ -39,14 +46,39 @@ void	free_array(char **array)
 	free(array);
 }
 
+static void	free_cmds_and_pipes(t_pipex *pipex)
+{
+	int	i;
+
+	if (pipex->cmd_args)
+		free(pipex->cmd_args);
+	if (pipex->cmd_paths)
+	{
+		i = 0;
+		while (i < pipex->cmd_count && pipex->cmd_paths[i])
+		{
+			free(pipex->cmd_paths[i]);
+			i++;
+		}
+		free(pipex->cmd_paths);
+	}
+	if (pipex->pipes)
+	{
+		i = 0;
+		while (i < pipex->pipe_count)
+		{
+			free(pipex->pipes[i]);
+			i++;
+		}
+		free(pipex->pipes);
+	}
+}
+
 void	free_pipex(t_pipex *pipex)
 {
-	free_array(pipex->cmd1_args);
-	free_array(pipex->cmd2_args);
-	if (pipex->cmd1_path)
-		free(pipex->cmd1_path);
-	if (pipex->cmd2_path)
-		free(pipex->cmd2_path);
+	free_cmds_and_pipes(pipex);
+	if (pipex->pids)
+		free(pipex->pids);
 	if (pipex->infile > 0)
 		close(pipex->infile);
 	if (pipex->outfile > 0)

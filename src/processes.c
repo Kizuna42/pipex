@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 04:25:03 by kizuna            #+#    #+#             */
-/*   Updated: 2025/04/16 15:51:19 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 16:07:34 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,28 +33,59 @@ static void	execute_cmd(char **cmd_args, char **envp)
 	}
 }
 
-void	child_process1(t_pipex *pipex, char **envp)
+static void	setup_io(t_pipex *pipex, int cmd_index)
 {
-	if (pipex->infile < 0)
-		exit(EXIT_FAILURE);
-	close(pipex->pipe_fd[0]);
-	if (dup2(pipex->infile, STDIN_FILENO) == -1)
-		error_exit("Dup2 error");
-	if (dup2(pipex->pipe_fd[1], STDOUT_FILENO) == -1)
-		error_exit("Dup2 error");
-	close(pipex->infile);
-	close(pipex->pipe_fd[1]);
-	execute_cmd(pipex->cmd1_args, envp);
+	if (cmd_index == 0)
+	{
+		if (dup2(pipex->infile, STDIN_FILENO) == -1)
+			error_exit("Dup2 error");
+		if (dup2(pipex->pipes[0][1], STDOUT_FILENO) == -1)
+			error_exit("Dup2 error");
+	}
+	else if (cmd_index == pipex->cmd_count - 1)
+	{
+		if (dup2(pipex->pipes[cmd_index - 1][0], STDIN_FILENO) == -1)
+			error_exit("Dup2 error");
+		if (dup2(pipex->outfile, STDOUT_FILENO) == -1)
+			error_exit("Dup2 error");
+	}
+	else
+	{
+		if (dup2(pipex->pipes[cmd_index - 1][0], STDIN_FILENO) == -1)
+			error_exit("Dup2 error");
+		if (dup2(pipex->pipes[cmd_index][1], STDOUT_FILENO) == -1)
+			error_exit("Dup2 error");
+	}
 }
 
-void	child_process2(t_pipex *pipex, char **envp)
+static void	prepare_command(t_pipex *pipex, char **cmd_splits)
 {
-	close(pipex->pipe_fd[1]);
-	if (dup2(pipex->pipe_fd[0], STDIN_FILENO) == -1)
-		error_exit("Dup2 error");
-	if (dup2(pipex->outfile, STDOUT_FILENO) == -1)
-		error_exit("Dup2 error");
-	close(pipex->pipe_fd[0]);
-	close(pipex->outfile);
-	execute_cmd(pipex->cmd2_args, envp);
+	int	i;
+
+	if (pipex->infile < 0 && pipex->cmd_count == 0)
+		exit(EXIT_FAILURE);
+	i = 0;
+	while (i < pipex->pipe_count)
+	{
+		close(pipex->pipes[i][0]);
+		close(pipex->pipes[i][1]);
+		i++;
+	}
+	if (pipex->infile > 0)
+		close(pipex->infile);
+	if (pipex->outfile > 0)
+		close(pipex->outfile);
+	if (!cmd_splits)
+		exit(EXIT_FAILURE);
+}
+
+void	exec_cmd(t_pipex *pipex, char **argv __attribute__((unused)),
+	char **envp, int cmd_index)
+{
+	char	**cmd_splits;
+
+	cmd_splits = ft_split(pipex->cmd_args[cmd_index], ' ');
+	setup_io(pipex, cmd_index);
+	prepare_command(pipex, cmd_splits);
+	execute_cmd(cmd_splits, envp);
 }
