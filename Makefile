@@ -5,65 +5,72 @@
 #                                                     +:+ +:+         +:+      #
 #    By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/04/16 04:25:03 by kizuna            #+#    #+#              #
-#    Updated: 2025/04/16 17:13:02 by kizuna           ###   ########.fr        #
+#    Created: 2025/04/16 18:38:41 by kizuna            #+#    #+#              #
+#    Updated: 2025/04/16 18:43:24 by kizuna           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-NAME = pipex
+PROG	= pipex
+PROG_B  = pipex_bonus
 
-CC = cc
-CFLAGS = -Wall -Wextra -Werror
+SRCS 	= srcs/pipex.c srcs/utils.c
+OBJS 	= ${SRCS:.c=.o}
+MAIN	= srcs/pipex.c
 
-SRCS = src/main.c \
-		src/pipex_utils.c \
-		src/pipex_init.c \
-		src/pipex_files.c \
-		src/pipex_path.c \
-		src/processes.c \
-		src/pipex_pipes.c \
-		src/pipex_heredoc.c \
-		src/pipex_dir_utils.c
+SRCS_B	= srcs/pipex_bonus.c srcs/utils.c srcs/utils_bonus.c
+OBJS_B	= ${SRCS_B:.c=.o}
+MAIN_B	= srcs/pipex_bonus.c
 
-BONUS_SRCS = src/main.c \
-		src/pipex_utils.c \
-		src/pipex_files.c \
-		src/pipex_path.c \
-		src/processes.c \
-		src/pipex_bonus_utils.c \
-		src/pipex_bonus_heredoc.c \
-		src/pipex_init_bonus.c \
-		src/pipex_pipes.c \
-		src/pipex_dir_utils.c
+HEADER	= -Iincludes -I.
 
-OBJS = $(SRCS:.c=.o)
-BONUS_OBJS = $(BONUS_SRCS:.c=.o)
+CC 		= gcc
+CFLAGS 	= -Wall -Wextra -Werror -g
 
-LIBFT_DIR = libft
-LIBFT = $(LIBFT_DIR)/libft.a
+.c.o:		%.o : %.c
+					@gcc ${CFLAGS} ${HEADER} -c $< -o $(<:.c=.o)
 
-all: $(NAME)
+all: 		${PROG}
 
-$(NAME): $(LIBFT) $(OBJS)
-	$(CC) $(CFLAGS) -o $(NAME) $(OBJS) -L$(LIBFT_DIR) -lft
+${PROG}:	${OBJS}
+					@echo "\033[33m----Compiling lib----"
+					@make re -C ./libft
+					@$(CC) ${OBJS} -Llibft -lft -o ${PROG}
+					@echo "\033[32mPipex Compiled! ᕦ(\033[31m♥\033[32m_\033[31m♥\033[32m)ᕤ\n"
 
-bonus: $(LIBFT) $(BONUS_OBJS)
-	$(CC) $(CFLAGS) -o $(NAME) $(BONUS_OBJS) -L$(LIBFT_DIR) -lft
 
-$(LIBFT):
-	make -C $(LIBFT_DIR)
+bonus:		${PROG_B}
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+${PROG_B}:	${OBJS_B}
+					@echo "\033[33m----Compiling lib----"
+					@make re -C ./libft
+					@$(CC) ${OBJS_B} -Llibft -lft -o ${PROG_B}
+					@echo "\033[32mPipex Bonus Compiled! ᕦ(\033[31m♥\033[32m_\033[31m♥\033[32m)ᕤ\n"
 
 clean:
-	rm -f $(OBJS) $(BONUS_OBJS) bonus
-	make -C $(LIBFT_DIR) clean
+					@make clean -C ./libft
+					@rm -f ${OBJS} ${OBJS_B}
 
-fclean: clean
-	rm -f $(NAME)
-	make -C $(LIBFT_DIR) fclean
+fclean: 	clean
+					@make fclean -C ./libft
+					@rm -f $(NAME)
+					@rm -f ${PROG}
+					@echo "\n\033[31mDeleting EVERYTHING! ⌐(ಠ۾ಠ)¬\n"
 
-re: fclean all
+re:			fclean all
 
-.PHONY: all clean fclean re bonus
+re_bonus:	fclean bonus
+
+party:
+					@printf "\033c"
+					@echo "\n\033[35m♪┏(・o･)┛♪"
+					@sleep 1
+					@printf "\033c"
+					@echo "\033[1;33m♪┗(・o･)┓♪"
+					@sleep 1
+					@printf "\033c"
+					@echo "\n\033[36m♪┏(・o･)┛♪"
+					@sleep 1
+					@printf "\033c"
+					@echo "\033[34m♪┗(・o･)┓♪\n"
+
+.PHONY: all clean fclean re re_bonus bonus party
