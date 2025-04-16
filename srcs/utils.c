@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/04 10:26:01 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 18:58:07 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 19:07:42 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,9 +57,13 @@ void	execute(char *argv, char **envp)
 	char	**cmd;
 	int		i;
 	char	*path;
+	char	*cmd_name;
 
 	i = -1;
 	cmd = ft_split(argv, ' ');
+	if (!cmd || !cmd[0])
+		error();
+	cmd_name = ft_strdup(cmd[0]);
 	path = find_path(cmd[0], envp);
 	if (!path)
 	{
@@ -67,10 +71,12 @@ void	execute(char *argv, char **envp)
 			free(cmd[i]);
 		free(cmd);
 		ft_putstr_fd("Error: command not found: ", 2);
-		ft_putstr_fd(cmd[0], 2);
+		ft_putstr_fd(cmd_name, 2);
 		ft_putstr_fd("\n", 2);
+		free(cmd_name);
 		exit(127);
 	}
+	free(cmd_name);
 	if (execve(path, cmd, envp) == -1)
 		error();
 }

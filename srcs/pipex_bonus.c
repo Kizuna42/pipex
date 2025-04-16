@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/05 10:33:51 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 18:59:44 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 19:07:42 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ void	here_doc_child(int *fd, char *limiter)
 		if (ft_strncmp(line, limiter, ft_strlen(limiter)) == 0)
 			exit(EXIT_SUCCESS);
 		write(fd[1], line, ft_strlen(line));
+		write(fd[1], "\n", 1);
+		free(line);
 		ft_putstr_fd("heredoc> ", 1);
 	}
 }
@@ -93,6 +95,7 @@ void	setup_files(int argc, char **argv, int *fileout, int *i)
 		*fileout = open_file(argv[argc - 1], 1);
 		filein = open_file(argv[1], 2);
 		dup2(filein, STDIN_FILENO);
+		close(filein);
 	}
 }
 
@@ -108,6 +111,7 @@ int	main(int argc, char **argv, char **envp)
 		while (i < argc - 2)
 			child_process(argv[i++], envp);
 		dup2(fileout, STDOUT_FILENO);
+		close(fileout);
 		execute(argv[argc - 2], envp);
 	}
 	else

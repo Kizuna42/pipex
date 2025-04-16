@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/02 09:54:02 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 18:58:07 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 19:07:42 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,19 @@ void	child_process(char *argv, char **envp)
 	}
 }
 
+/* Setup input and output file descriptors */
+void	setup_io_files(char **argv, int argc, int *filein, int *fileout)
+{
+	*fileout = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0777);
+	if (*fileout == -1)
+		error();
+	*filein = open(argv[1], O_RDONLY, 0777);
+	if (*filein == -1)
+		error();
+	dup2(*filein, STDIN_FILENO);
+	close(*filein);
+}
+
 /* Main function that run the childs process with the right file descriptor
  or display an error message if arguments are wrong. */
 int	main(int argc, char **argv, char **envp)
@@ -50,16 +63,11 @@ int	main(int argc, char **argv, char **envp)
 	if (argc >= 5)
 	{
 		i = 2;
-		fileout = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0777);
-		if (fileout == -1)
-			error();
-		filein = open(argv[1], O_RDONLY, 0777);
-		if (filein == -1)
-			error();
-		dup2(filein, STDIN_FILENO);
+		setup_io_files(argv, argc, &filein, &fileout);
 		while (i < argc - 2)
 			child_process(argv[i++], envp);
 		dup2(fileout, STDOUT_FILENO);
+		close(fileout);
 		execute(argv[argc - 2], envp);
 	}
 	else
