@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/12 15:04:26 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 19:37:07 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 19:44:16 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int	main(int argc, char **argv, char **envp)
 		file_result = setup_files(argc, argv, &i);
 		cmd_result = process_commands(argv, envp, i, argc);
 		if (file_result)
-			return (EXIT_FAILURE);
+			return (1);
 		return (cmd_result);
 	}
 	usage();

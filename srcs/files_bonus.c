@@ -6,13 +6,13 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 20:20:30 by kizuna            #+#    #+#             */
-/*   Updated: 2025/04/16 19:36:42 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 19:47:40 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-/* Setup for heredoc mode */
+/* Setup for heredoc mode with append to output file */
 int	setup_heredoc(int argc, char **argv, int *i)
 {
 	int	output_file;
@@ -20,11 +20,16 @@ int	setup_heredoc(int argc, char **argv, int *i)
 
 	had_error = 0;
 	*i = 3;
-	output_file = open_file(argv[argc - 1], 0);
+	output_file = open(argv[argc - 1], O_WRONLY | O_CREAT | O_APPEND, 0777);
 	if (output_file == -1)
+	{
+		perror("\033[31mError");
+		output_file = open("/dev/null", O_WRONLY);
 		had_error = 1;
+	}
 	here_doc(argv[2], argc);
 	dup2(output_file, STDOUT_FILENO);
+	close(output_file);
 	return (had_error);
 }
 

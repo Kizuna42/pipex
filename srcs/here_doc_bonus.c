@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 20:15:30 by kizuna            #+#    #+#             */
-/*   Updated: 2025/04/16 19:36:09 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 19:45:49 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,18 @@ void	here_doc_child(int *fd, char *limiter)
 	while (pipex_get_next_line(&line))
 	{
 		if (ft_strncmp(line, limiter, ft_strlen(limiter)) == 0)
+		{
+			free(line);
+			close(fd[1]);
 			exit(EXIT_SUCCESS);
+		}
 		write(fd[1], line, ft_strlen(line));
 		write(fd[1], "\n", 1);
 		free(line);
 		ft_putstr_fd("heredoc> ", 1);
 	}
 	free(line);
+	close(fd[1]);
 	exit(EXIT_SUCCESS);
 }
 
