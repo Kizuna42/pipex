@@ -6,7 +6,7 @@
 #    By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/01/25 16:01:19 by kizuna            #+#    #+#              #
-#    Updated: 2025/04/16 01:05:43 by kizuna           ###   ########.fr        #
+#    Updated: 2025/04/16 20:16:20 by kizuna           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -58,6 +58,7 @@ SRCS = $(FT_IS_DIR)ft_isalnum.c \
 		$(FT_STR_DIR)ft_strlcpy.c \
 		$(FT_STR_DIR)ft_strlen.c \
 		$(FT_STR_DIR)ft_strmapi.c \
+		$(FT_STR_DIR)ft_strcmp.c \
 		$(FT_STR_DIR)ft_strncmp.c \
 		$(FT_STR_DIR)ft_strnstr.c \
 		$(FT_STR_DIR)ft_strrchr.c \
