@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/05 10:33:51 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 19:07:42 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 19:16:21 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ void	child_process(char *argv, char **envp)
 {
 	pid_t	pid;
 	int		fd[2];
+	int		status;
 
 	if (pipe(fd) == -1)
 		error();
@@ -35,7 +36,7 @@ void	child_process(char *argv, char **envp)
 	{
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
-		waitpid(pid, NULL, 0);
+		waitpid(pid, &status, 0);
 	}
 }
 
@@ -55,6 +56,8 @@ void	here_doc_child(int *fd, char *limiter)
 		free(line);
 		ft_putstr_fd("heredoc> ", 1);
 	}
+	free(line);
+	exit(EXIT_SUCCESS);
 }
 
 /* Function for here_doc processing with child process and pipe */
@@ -62,6 +65,7 @@ void	here_doc(char *limiter, int argc)
 {
 	pid_t	reader;
 	int		fd[2];
+	int		status;
 
 	if (argc < 6)
 		usage();
@@ -74,7 +78,8 @@ void	here_doc(char *limiter, int argc)
 	{
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
-		wait(NULL);
+		close(fd[0]);
+		waitpid(reader, &status, 0);
 	}
 }
 
@@ -86,7 +91,12 @@ void	setup_files(int argc, char **argv, int *fileout, int *i)
 	if (ft_strncmp(argv[1], "here_doc", 8) == 0)
 	{
 		*i = 3;
-		*fileout = open_file(argv[argc - 1], 0);
+		*fileout = open(argv[argc - 1], O_WRONLY | O_CREAT | O_APPEND, 0777);
+		if (*fileout == -1)
+		{
+			perror("\033[31mError");
+			*fileout = open("/dev/null", O_WRONLY);
+		}
 		here_doc(argv[2], argc);
 	}
 	else

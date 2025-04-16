@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/02 09:54:02 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 19:07:42 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 19:13:09 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ void	child_process(char *argv, char **envp)
 {
 	pid_t	pid;
 	int		fd[2];
+	int		status;
 
 	if (pipe(fd) == -1)
 		error();
@@ -35,7 +36,7 @@ void	child_process(char *argv, char **envp)
 	{
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
-		waitpid(pid, NULL, 0);
+		waitpid(pid, &status, 0);
 	}
 }
 
@@ -44,10 +45,16 @@ void	setup_io_files(char **argv, int argc, int *filein, int *fileout)
 {
 	*fileout = open(argv[argc - 1], O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	if (*fileout == -1)
-		error();
+	{
+		perror("\033[31mError");
+		*fileout = open("/dev/null", O_WRONLY);
+	}
 	*filein = open(argv[1], O_RDONLY, 0777);
 	if (*filein == -1)
-		error();
+	{
+		perror("\033[31mError");
+		*filein = open("/dev/null", O_RDONLY);
+	}
 	dup2(*filein, STDIN_FILENO);
 	close(*filein);
 }

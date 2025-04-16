@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/12 16:01:16 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 18:59:44 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 19:13:09 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,10 +36,11 @@ int	open_file(char *argv, int i)
 		file = open(argv, O_RDONLY, 0777);
 	if (file == -1)
 	{
-		ft_putstr_fd("Error: cannot open file: ", 2);
-		ft_putstr_fd(argv, 2);
-		ft_putstr_fd("\n", 2);
-		exit(1);
+		perror("\033[31mError");
+		if (i == 0 || i == 1)
+			file = open("/dev/null", O_WRONLY);
+		else
+			file = open("/dev/null", O_RDONLY);
 	}
 	return (file);
 }
