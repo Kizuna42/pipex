@@ -6,7 +6,7 @@
 #    By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/16 18:38:41 by kizuna            #+#    #+#              #
-#    Updated: 2025/04/16 18:43:24 by kizuna           ###   ########.fr        #
+#    Updated: 2025/04/16 19:37:37 by kizuna           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ SRCS 	= srcs/pipex.c srcs/utils.c
 OBJS 	= ${SRCS:.c=.o}
 MAIN	= srcs/pipex.c
 
-SRCS_B	= srcs/pipex_bonus.c srcs/utils.c srcs/utils_bonus.c
+SRCS_B	= srcs/pipex_bonus.c srcs/utils.c srcs/utils_bonus.c srcs/process_bonus.c srcs/here_doc_bonus.c srcs/files_bonus.c
 OBJS_B	= ${SRCS_B:.c=.o}
 MAIN_B	= srcs/pipex_bonus.c
 
