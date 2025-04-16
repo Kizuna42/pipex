@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/12 16:01:16 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 18:43:21 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 18:59:44 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@ void	usage(void)
 {
 	ft_putstr_fd("\033[31mError: Bad argument\n\e[0m", 2);
 	ft_putstr_fd("Ex: ./pipex <file1> <cmd1> <cmd2> <...> <file2>\n", 1);
-	ft_putstr_fd("    ./pipex \"here_doc\"<LIMITER> <cmd> <cmd1> <...> <file>\n", 1);
+	ft_putstr_fd("    ./pipex \"here_doc\" <LIMITER> <cmd> <cmd1> <...> ", 1);
+	ft_putstr_fd("<file>\n", 1);
 	exit(EXIT_SUCCESS);
 }
 
@@ -34,6 +35,11 @@ int	open_file(char *argv, int i)
 	else if (i == 2)
 		file = open(argv, O_RDONLY, 0777);
 	if (file == -1)
-		error();
+	{
+		ft_putstr_fd("Error: cannot open file: ", 2);
+		ft_putstr_fd(argv, 2);
+		ft_putstr_fd("\n", 2);
+		exit(1);
+	}
 	return (file);
 }

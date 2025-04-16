@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/05 10:33:51 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 18:44:40 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 18:59:44 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,14 +39,27 @@ void	child_process(char *argv, char **envp)
 	}
 }
 
-/* Function who make a child process that will read from the stdin with
- get_next_line until it find the limiter word and then put the output inside a
- pipe. The main process will change his stdin for the pipe file descriptor. */
+/* Child process for here_doc that reads from stdin until it finds limiter */
+void	here_doc_child(int *fd, char *limiter)
+{
+	char	*line;
+
+	close(fd[0]);
+	ft_putstr_fd("heredoc> ", 1);
+	while (pipex_get_next_line(&line))
+	{
+		if (ft_strncmp(line, limiter, ft_strlen(limiter)) == 0)
+			exit(EXIT_SUCCESS);
+		write(fd[1], line, ft_strlen(line));
+		ft_putstr_fd("heredoc> ", 1);
+	}
+}
+
+/* Function for here_doc processing with child process and pipe */
 void	here_doc(char *limiter, int argc)
 {
 	pid_t	reader;
 	int		fd[2];
-	char	*line;
 
 	if (argc < 6)
 		usage();
@@ -54,15 +67,7 @@ void	here_doc(char *limiter, int argc)
 		error();
 	reader = fork();
 	if (reader == 0)
-	{
-		close(fd[0]);
-		while (pipex_get_next_line(&line))
-		{
-			if (ft_strncmp(line, limiter, ft_strlen(limiter)) == 0)
-				exit(EXIT_SUCCESS);
-			write(fd[1], line, ft_strlen(line));
-		}
-	}
+		here_doc_child(fd, limiter);
 	else
 	{
 		close(fd[1]);
@@ -71,34 +76,41 @@ void	here_doc(char *limiter, int argc)
 	}
 }
 
-/* Main function that run the childs process with the right file descriptor
- or display an error message if arguments are wrong. It will run here_doc
- function if the "here_doc" string is find in argv[1] */
+/* Process input arguments and setup file descriptors */
+void	setup_files(int argc, char **argv, int *fileout, int *i)
+{
+	int	filein;
+
+	if (ft_strncmp(argv[1], "here_doc", 8) == 0)
+	{
+		*i = 3;
+		*fileout = open_file(argv[argc - 1], 0);
+		here_doc(argv[2], argc);
+	}
+	else
+	{
+		*i = 2;
+		*fileout = open_file(argv[argc - 1], 1);
+		filein = open_file(argv[1], 2);
+		dup2(filein, STDIN_FILENO);
+	}
+}
+
+/* Main function to process commands with pipes */
 int	main(int argc, char **argv, char **envp)
 {
 	int	i;
-	int	filein;
 	int	fileout;
 
 	if (argc >= 5)
 	{
-		if (ft_strncmp(argv[1], "here_doc", 8) == 0)
-		{
-			i = 3;
-			fileout = open_file(argv[argc - 1], 0);
-			here_doc(argv[2], argc);
-		}
-		else
-		{
-			i = 2;
-			fileout = open_file(argv[argc - 1], 1);
-			filein = open_file(argv[1], 2);
-			dup2(filein, STDIN_FILENO);
-		}
+		setup_files(argc, argv, &fileout, &i);
 		while (i < argc - 2)
 			child_process(argv[i++], envp);
 		dup2(fileout, STDOUT_FILENO);
 		execute(argv[argc - 2], envp);
 	}
-	usage();
+	else
+		usage();
+	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/04 10:26:01 by gcollet           #+#    #+#             */
-/*   Updated: 2025/04/16 18:42:45 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/04/16 18:58:07 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,10 @@ void	execute(char *argv, char **envp)
 		while (cmd[++i])
 			free(cmd[i]);
 		free(cmd);
-		error();
+		ft_putstr_fd("Error: command not found: ", 2);
+		ft_putstr_fd(cmd[0], 2);
+		ft_putstr_fd("\n", 2);
+		exit(127);
 	}
 	if (execve(path, cmd, envp) == -1)
 		error();
@@ -93,9 +96,8 @@ int	pipex_get_next_line(char **line)
 		i++;
 		r = read(0, &c, 1);
 	}
-	buffer[i] = '\n';
-	buffer[++i] = '\0';
-	*line = buffer;
+	buffer[i] = '\0';
+	*line = ft_strdup(buffer);
 	free(buffer);
 	return (r);
 }
