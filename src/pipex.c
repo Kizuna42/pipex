@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 20:15:58 by kizuna            #+#    #+#             */
-/*   Updated: 2025/04/16 20:15:59 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/05/02 19:49:21 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ void	exec(char *cmd, char **env)
 		ft_putstr_fd("pipex: command not found: ", 2);
 		ft_putendl_fd(s_cmd[0], 2);
 		ft_free_tab(s_cmd);
-		exit(0);
+		free(path);
+		exit(127);
 	}
 }
 
@@ -36,6 +37,8 @@ void	child(char **av, int *p_fd, char **env)
 	dup2(fd, 0);
 	dup2(p_fd[1], 1);
 	close(p_fd[0]);
+	close(p_fd[1]);
+	close(fd);
 	exec(av[2], env);
 }
 
@@ -46,7 +49,9 @@ void	parent(char **av, int *p_fd, char **env)
 	fd = open_file(av[4], 1);
 	dup2(fd, 1);
 	dup2(p_fd[0], 0);
+	close(p_fd[0]);
 	close(p_fd[1]);
+	close(fd);
 	exec(av[3], env);
 }
 
@@ -54,15 +59,18 @@ int	main(int ac, char **av, char **env)
 {
 	int		p_fd[2];
 	pid_t	pid;
+	int		status;
 
 	if (ac != 5)
 		exit_handler(1);
 	if (pipe(p_fd) == -1)
-		exit(-1);
+		exit(1);
 	pid = fork();
 	if (pid == -1)
-		exit(-1);
+		exit(1);
 	if (!pid)
 		child(av, p_fd, env);
+	waitpid(pid, &status, 0);
 	parent(av, p_fd, env);
+	return (WEXITSTATUS(status));
 }

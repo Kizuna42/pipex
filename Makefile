@@ -6,7 +6,7 @@
 #    By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/16 20:15:47 by kizuna            #+#    #+#              #
-#    Updated: 2025/04/30 18:45:31 by kizuna           ###   ########.fr        #
+#    Updated: 2025/05/02 19:52:18 by kizuna           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,10 +18,12 @@ RM = rm -rf
 
 SRCS = 	src/pipex.c\
 		src/utils.c\
+		src/path.c\
 		libft/libft.a\
 
 SRCS_BONUS = 	src_bonus/pipex_bonus.c\
 				src_bonus/utils_bonus.c\
+				src_bonus/path_bonus.c\
 				libft/libft.a\
 
 $(NAME) :

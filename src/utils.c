@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/16 20:16:09 by kizuna            #+#    #+#             */
-/*   Updated: 2025/04/16 20:16:10 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/05/02 19:52:18 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	exit_handler(int n_exit)
 {
 	if (n_exit == 1)
 		ft_putstr_fd("./pipex infile cmd cmd outfile\n", 2);
-	exit(0);
+	exit(n_exit);
 }
 
 int	open_file(char *file, int in_or_out)
@@ -28,7 +28,16 @@ int	open_file(char *file, int in_or_out)
 	if (in_or_out == 1)
 		ret = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
 	if (ret == -1)
-		exit(0);
+	{
+		ft_putstr_fd("pipex: ", 2);
+		ft_putstr_fd(file, 2);
+		ft_putstr_fd(": ", 2);
+		perror("");
+		if (in_or_out == 0)
+			exit(0);
+		else
+			exit(1);
+	}
 	return (ret);
 }
 
@@ -67,32 +76,4 @@ char	*my_getenv(char *name, char **env)
 		i++;
 	}
 	return (NULL);
-}
-
-char	*get_path(char *cmd, char **env)
-{
-	int		i;
-	char	*exec;
-	char	**allpath;
-	char	*path_part;
-	char	**s_cmd;
-
-	i = -1;
-	allpath = ft_split(my_getenv("PATH", env), ':');
-	s_cmd = ft_split(cmd, ' ');
-	while (allpath[++i])
-	{
-		path_part = ft_strjoin(allpath[i], "/");
-		exec = ft_strjoin(path_part, s_cmd[0]);
-		free(path_part);
-		if (access(exec, F_OK | X_OK) == 0)
-		{
-			ft_free_tab(s_cmd);
-			return (exec);
-		}
-		free(exec);
-	}
-	ft_free_tab(allpath);
-	ft_free_tab(s_cmd);
-	return (cmd);
 }
