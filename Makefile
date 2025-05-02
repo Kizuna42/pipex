@@ -6,13 +6,11 @@
 #    By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/16 20:15:47 by kizuna            #+#    #+#              #
-#    Updated: 2025/04/16 20:20:46 by kizuna           ###   ########.fr        #
+#    Updated: 2025/04/30 18:45:31 by kizuna           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = pipex
-
-CC = cc
 
 CFLAGS = -Werror -Wall -Wextra -fsanitize=address
 
@@ -28,7 +26,7 @@ SRCS_BONUS = 	src_bonus/pipex_bonus.c\
 
 $(NAME) :
 	make all -C libft
-	gcc $(CFLAGS) $(SRCS) -o $(NAME)
+	cc $(CFLAGS) $(SRCS) -o $(NAME)
 
 
 all : $(NAME)
@@ -45,6 +43,6 @@ re : fclean all
 
 bonus : clean
 	make all -C libft
-	gcc $(CFLAGS) $(SRCS_BONUS) -o $(NAME)
+	cc $(CFLAGS) $(SRCS_BONUS) -o $(NAME)
 
 .PHONY : all clean fclean re bonus
