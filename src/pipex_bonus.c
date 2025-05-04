@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex_bonus.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kishino <kishino@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/05 10:33:51 by gcollet           #+#    #+#             */
-/*   Updated: 2025/05/02 20:55:10 by kishino          ###   ########.fr       */
+/*   Updated: 2025/05/04 16:00:56 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ void	here_doc(char *limiter, int argc)
 	if (reader == 0)
 	{
 		close(fd[0]);
-		while (get_next_line(&line))
+		while (custom_get_next_line(&line))
 		{
 			if (ft_strncmp(line, limiter, ft_strlen(limiter)) == 0)
 				exit(EXIT_SUCCESS);

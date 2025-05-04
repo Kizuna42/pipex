@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.h                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kishino <kishino@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/02 09:58:35 by gcollet           #+#    #+#             */
-/*   Updated: 2025/05/02 20:54:44 by kishino          ###   ########.fr       */
+/*   Updated: 2025/05/04 16:00:56 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 /* Mandatory functions */
 void	error(void);
 char	*find_path(char *cmd, char **envp);
-int		get_next_line(char **line);
+char	*custom_get_next_line(char **line);
 void	execute(char *argv, char **envp);
 
 /* Bonus functions */

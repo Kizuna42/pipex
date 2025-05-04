@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: kishino <kishino@student.42.fr>            +#+  +:+       +#+         #
+#    By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/16 20:15:47 by kizuna            #+#    #+#              #
-#    Updated: 2025/05/02 20:58:41 by kishino          ###   ########.fr        #
+#    Updated: 2025/05/04 16:00:28 by kizuna           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,14 +18,16 @@ RM = rm -rf
 
 SRCS = 	src/pipex.c\
 		src/utils.c\
-		src/pipex_bonus.c\
+		libft/libft.a\
+
+BONUS_SRCS = src/pipex_bonus.c\
 		src/utils_bonus.c\
+		src/utils.c\
 		libft/libft.a\
 
 $(NAME) :
 	make all -C libft
 	cc $(CFLAGS) $(SRCS) -o $(NAME)
-
 
 all : $(NAME)
 
@@ -39,8 +41,8 @@ clean :
 
 re : fclean all
 
-bonus : clean
+bonus :
 	make all -C libft
-	cc $(CFLAGS) $(SRCS) -o $(NAME)
+	cc $(CFLAGS) $(BONUS_SRCS) -o $(NAME)
 
 .PHONY : all clean fclean re bonus

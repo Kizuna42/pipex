@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kishino <kishino@student.42.fr>            +#+  +:+       +#+        */
+/*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/08/04 10:26:01 by gcollet           #+#    #+#             */
-/*   Updated: 2025/05/04 15:23:37 by kishino          ###   ########.fr       */
+/*   Updated: 2025/05/04 16:11:44 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ void	execute(char *argv, char **envp)
 }
 
 /* Function that will read input from the terminal and return line. */
-int	get_next_line(char **line)
+char	*custom_get_next_line(char **line)
 {
 	char	*buffer;
 	int		i;
@@ -84,7 +84,7 @@ int	get_next_line(char **line)
 	r = 0;
 	buffer = (char *)malloc(10000);
 	if (!buffer)
-		return (-1);
+		return (NULL);
 	r = read(0, &c, 1);
 	while (r && c != '\n' && c != '\0')
 	{
@@ -96,6 +96,5 @@ int	get_next_line(char **line)
 	buffer[i] = '\n';
 	buffer[++i] = '\0';
 	*line = buffer;
-	free(buffer);
-	return (r);
+	return (buffer);
 }
