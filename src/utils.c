@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/04 16:25:16 by kizuna            #+#    #+#             */
-/*   Updated: 2025/05/04 16:25:19 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/05/04 16:31:13 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ void	error(void)
 void	execute(char *argv, char **envp)
 {
 	char	**cmd;
-	int 	i;
+	int		i;
 	char	*path;
 
 	i = -1;
