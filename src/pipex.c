@@ -3,74 +3,68 @@
 /*                                                        :::      ::::::::   */
 /*   pipex.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kishino <kishino@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/16 20:15:58 by kizuna            #+#    #+#             */
-/*   Updated: 2025/05/02 19:49:21 by kizuna           ###   ########.fr       */
+/*   Created: 2021/08/02 09:54:02 by gcollet           #+#    #+#             */
+/*   Updated: 2025/05/02 20:53:21 by kishino          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	exec(char *cmd, char **env)
+/* Child process that run inside a fork, take the filein, put the output inside
+ a pipe and then close with the exec function */
+void	child_process(char **argv, char **envp, int *fd)
 {
-	char	**s_cmd;
-	char	*path;
+	int		filein;
 
-	s_cmd = ft_split(cmd, ' ');
-	path = get_path(s_cmd[0], env);
-	if (execve(path, s_cmd, env) == -1)
+	filein = open(argv[1], O_RDONLY, 0777);
+	if (filein == -1)
+		error();
+	dup2(fd[1], STDOUT_FILENO);
+	dup2(filein, STDIN_FILENO);
+	close(fd[0]);
+	execute(argv[2], envp);
+}
+
+/* Parent process that take the data from the pipe, change the output for the
+ fileout and also close with the exec function */
+void	parent_process(char **argv, char **envp, int *fd)
+{
+	int		fileout;
+
+	fileout = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0777);
+	if (fileout == -1)
+		error();
+	dup2(fd[0], STDIN_FILENO);
+	dup2(fileout, STDOUT_FILENO);
+	close(fd[1]);
+	execute(argv[3], envp);
+}
+
+/* Main function that run the child and parent process or display an error
+ message if arguments are wrong */
+int	main(int argc, char **argv, char **envp)
+{
+	int		fd[2];
+	pid_t	pid1;
+
+	if (argc == 5)
 	{
-		ft_putstr_fd("pipex: command not found: ", 2);
-		ft_putendl_fd(s_cmd[0], 2);
-		ft_free_tab(s_cmd);
-		free(path);
-		exit(127);
+		if (pipe(fd) == -1)
+			error();
+		pid1 = fork();
+		if (pid1 == -1)
+			error();
+		if (pid1 == 0)
+			child_process(argv, envp, fd);
+		waitpid(pid1, NULL, 0);
+		parent_process(argv, envp, fd);
 	}
-}
-
-void	child(char **av, int *p_fd, char **env)
-{
-	int		fd;
-
-	fd = open_file(av[1], 0);
-	dup2(fd, 0);
-	dup2(p_fd[1], 1);
-	close(p_fd[0]);
-	close(p_fd[1]);
-	close(fd);
-	exec(av[2], env);
-}
-
-void	parent(char **av, int *p_fd, char **env)
-{
-	int		fd;
-
-	fd = open_file(av[4], 1);
-	dup2(fd, 1);
-	dup2(p_fd[0], 0);
-	close(p_fd[0]);
-	close(p_fd[1]);
-	close(fd);
-	exec(av[3], env);
-}
-
-int	main(int ac, char **av, char **env)
-{
-	int		p_fd[2];
-	pid_t	pid;
-	int		status;
-
-	if (ac != 5)
-		exit_handler(1);
-	if (pipe(p_fd) == -1)
-		exit(1);
-	pid = fork();
-	if (pid == -1)
-		exit(1);
-	if (!pid)
-		child(av, p_fd, env);
-	waitpid(pid, &status, 0);
-	parent(av, p_fd, env);
-	return (WEXITSTATUS(status));
+	else
+	{
+		ft_putstr_fd("\033[31mError: Bad arguments\n\e[0m", 2);
+		ft_putstr_fd("Ex: ./pipex <file1> <cmd1> <cmd2> <file2>\n", 1);
+	}
+	return (0);
 }

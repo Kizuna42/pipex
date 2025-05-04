@@ -3,77 +3,99 @@
 /*                                                        :::      ::::::::   */
 /*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
+/*   By: kishino <kishino@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/16 20:16:09 by kizuna            #+#    #+#             */
-/*   Updated: 2025/05/02 19:52:18 by kizuna           ###   ########.fr       */
+/*   Created: 2021/08/04 10:26:01 by gcollet           #+#    #+#             */
+/*   Updated: 2025/05/04 15:23:37 by kishino          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-void	exit_handler(int n_exit)
+/* Function that will look for the path line inside the environment, will
+ split and test each command path and then return the right one. */
+char	*find_path(char *cmd, char **envp)
 {
-	if (n_exit == 1)
-		ft_putstr_fd("./pipex infile cmd cmd outfile\n", 2);
-	exit(n_exit);
-}
-
-int	open_file(char *file, int in_or_out)
-{
-	int	ret;
-
-	if (in_or_out == 0)
-		ret = open(file, O_RDONLY, 0777);
-	if (in_or_out == 1)
-		ret = open(file, O_WRONLY | O_CREAT | O_TRUNC, 0777);
-	if (ret == -1)
-	{
-		ft_putstr_fd("pipex: ", 2);
-		ft_putstr_fd(file, 2);
-		ft_putstr_fd(": ", 2);
-		perror("");
-		if (in_or_out == 0)
-			exit(0);
-		else
-			exit(1);
-	}
-	return (ret);
-}
-
-void	ft_free_tab(char **tab)
-{
-	size_t	i;
-
-	i = 0;
-	while (tab[i])
-	{
-		free(tab[i]);
-		i++;
-	}
-	free(tab);
-}
-
-char	*my_getenv(char *name, char **env)
-{
+	char	**paths;
+	char	*path;
 	int		i;
-	int		j;
-	char	*sub;
+	char	*part_path;
 
 	i = 0;
-	while (env[i])
+	while (ft_strnstr(envp[i], "PATH", 4) == 0)
+		i++;
+	paths = ft_split(envp[i] + 5, ':');
+	i = 0;
+	while (paths[i])
 	{
-		j = 0;
-		while (env[i][j] && env[i][j] != '=')
-			j++;
-		sub = ft_substr(env[i], 0, j);
-		if (ft_strcmp(sub, name) == 0)
-		{
-			free(sub);
-			return (env[i] + j + 1);
-		}
-		free(sub);
+		part_path = ft_strjoin(paths[i], "/");
+		path = ft_strjoin(part_path, cmd);
+		free(part_path);
+		if (access(path, F_OK) == 0)
+			return (path);
+		free(path);
 		i++;
 	}
-	return (NULL);
+	i = -1;
+	while (paths[++i])
+		free(paths[i]);
+	free(paths);
+	return (0);
+}
+
+/* A simple error displaying function. */
+void	error(void)
+{
+	perror("\033[31mError");
+	exit(EXIT_FAILURE);
+}
+
+/* Function that take the command and send it to find_path
+ before executing it. */
+void	execute(char *argv, char **envp)
+{
+	char	**cmd;
+	int 	i;
+	char	*path;
+
+	i = -1;
+	cmd = ft_split(argv, ' ');
+	path = find_path(cmd[0], envp);
+	if (!path)
+	{
+		while (cmd[++i])
+			free(cmd[i]);
+		free(cmd);
+		error();
+	}
+	if (execve(path, cmd, envp) == -1)
+		error();
+}
+
+/* Function that will read input from the terminal and return line. */
+int	get_next_line(char **line)
+{
+	char	*buffer;
+	int		i;
+	int		r;
+	char	c;
+
+	i = 0;
+	r = 0;
+	buffer = (char *)malloc(10000);
+	if (!buffer)
+		return (-1);
+	r = read(0, &c, 1);
+	while (r && c != '\n' && c != '\0')
+	{
+		if (c != '\n' && c != '\0')
+			buffer[i] = c;
+		i++;
+		r = read(0, &c, 1);
+	}
+	buffer[i] = '\n';
+	buffer[++i] = '\0';
+	*line = buffer;
+	free(buffer);
+	return (r);
 }
