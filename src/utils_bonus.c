@@ -6,13 +6,12 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/04 17:05:47 by kizuna            #+#    #+#             */
-/*   Updated: 2025/05/04 17:09:09 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/05/04 19:46:06 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-/* Function to display error message when arguments are wrong */
 void	usage(void)
 {
 	ft_putstr_fd("\033[31mError: Bad argument\n\e[0m", 2);
@@ -22,7 +21,6 @@ void	usage(void)
 	exit(EXIT_SUCCESS);
 }
 
-/* Function to open the files with the right flags */
 int	open_file(char *argv, int i)
 {
 	int	file;

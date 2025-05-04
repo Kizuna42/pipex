@@ -6,14 +6,12 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/04 16:25:16 by kizuna            #+#    #+#             */
-/*   Updated: 2025/05/04 16:31:13 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/05/04 19:46:25 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-/* Function that will look for the path line inside the environment, will
- split and test each command path and then return the right one. */
 char	*find_path(char *cmd, char **envp)
 {
 	char	**paths;
@@ -43,15 +41,12 @@ char	*find_path(char *cmd, char **envp)
 	return (0);
 }
 
-/* A simple error displaying function. */
 void	error(void)
 {
 	perror("\033[31mError");
 	exit(EXIT_FAILURE);
 }
 
-/* Function that take the command and send it to find_path
- before executing it. */
 void	execute(char *argv, char **envp)
 {
 	char	**cmd;
@@ -70,31 +65,4 @@ void	execute(char *argv, char **envp)
 	}
 	if (execve(path, cmd, envp) == -1)
 		error();
-}
-
-/* Function that will read input from the terminal and return line. */
-char	*custom_get_next_line(char **line)
-{
-	char	*buffer;
-	int		i;
-	int		r;
-	char	c;
-
-	i = 0;
-	r = 0;
-	buffer = (char *)malloc(10000);
-	if (!buffer)
-		return (NULL);
-	r = read(0, &c, 1);
-	while (r && c != '\n' && c != '\0')
-	{
-		if (c != '\n' && c != '\0')
-			buffer[i] = c;
-		i++;
-		r = read(0, &c, 1);
-	}
-	buffer[i] = '\n';
-	buffer[++i] = '\0';
-	*line = buffer;
-	return (buffer);
 }

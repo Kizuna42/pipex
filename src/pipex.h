@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/04 16:25:29 by kizuna            #+#    #+#             */
-/*   Updated: 2025/05/04 17:09:03 by kizuna           ###   ########.fr       */
+/*   Updated: 2025/05/04 19:42:38 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,6 @@
 /* Mandatory functions */
 void	error(void);
 char	*find_path(char *cmd, char **envp);
-char	*custom_get_next_line(char **line);
 void	execute(char *argv, char **envp);
 
 /* Bonus functions */
