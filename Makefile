@@ -6,43 +6,44 @@
 #    By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/16 20:15:47 by kizuna            #+#    #+#              #
-#    Updated: 2025/05/04 16:00:28 by kizuna           ###   ########.fr        #
+#    Updated: 2025/05/04 17:06:28 by kizuna           ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = pipex
+NAME_BONUS = pipex_bonus
 
-CFLAGS = -Werror -Wall -Wextra -fsanitize=address
-
+CFLAGS = -Wall -Wextra -Werror -fsanitize=address
 RM = rm -rf
 
-SRCS = 	src/pipex.c\
-		src/utils.c\
-		libft/libft.a\
+SRCS = src/pipex.c src/utils.c
+BONUS_SRCS = src/pipex_bonus.c src/utils_bonus.c src/utils.c
 
-BONUS_SRCS = src/pipex_bonus.c\
-		src/utils_bonus.c\
-		src/utils.c\
-		libft/libft.a\
+LIBFT_DIR = libft
+LIBFT = $(LIBFT_DIR)/libft.a
 
-$(NAME) :
-	make all -C libft
-	cc $(CFLAGS) $(SRCS) -o $(NAME)
+OBJS = $(SRCS:.c=.o)
+BONUS_OBJS = $(BONUS_SRCS:.c=.o)
 
-all : $(NAME)
+all: $(NAME)
 
-fclean : clean
-	$(RM) $(NAME)
-	make fclean -C libft
+$(LIBFT):
+	make -C $(LIBFT_DIR)
 
-clean :
-	$(RM) $(NAME)
-	make clean -C libft
+$(NAME): $(LIBFT) $(OBJS)
+	cc $(CFLAGS) $(OBJS) -L$(LIBFT_DIR) -lft -o $(NAME)
 
-re : fclean all
+bonus: $(LIBFT) $(BONUS_OBJS)
+	cc $(CFLAGS) $(BONUS_OBJS) -L$(LIBFT_DIR) -lft -o $(NAME_BONUS)
 
-bonus :
-	make all -C libft
-	cc $(CFLAGS) $(BONUS_SRCS) -o $(NAME)
+clean:
+	$(RM) $(OBJS) $(BONUS_OBJS)
+	make clean -C $(LIBFT_DIR)
 
-.PHONY : all clean fclean re bonus
+fclean: clean
+	$(RM) $(NAME) $(NAME_BONUS)
+	make fclean -C $(LIBFT_DIR)
+
+re: fclean all
+
+.PHONY: all clean fclean re bonus
