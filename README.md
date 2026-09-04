@@ -122,10 +122,10 @@ bonus はコマンド数分の pipe を配列で先に確保しません。`chil
 
 1. **大きな入力でデッドロックする（最も重い制限）**
    mandatory / bonus とも「先に `waitpid` で前段の終了を待ってから、自プロセスが後段のコマンドに
-   `execve` する」逐次構造です。そのため前段の出力がパイプバッファ（64KB）を超えると、
-   読む側が誰もいない状態で `write` がブロックして停止します。
-   実測: 740,000 バイトのファイルに対して `timeout 5 ./pipex big.txt cat "head -1" out` が
-   exit 124（`./pipex_bonus` も同じ）。小さいファイルでは正常終了します。
+   `execve` する」逐次構造です。そのため前段の出力がパイプバッファ（macOS では最大 64KB）を
+   超えると、読む側が誰もいない状態で `write` がブロックして停止します。
+   実測: `timeout 5 ./pipex <file> cat "head -1" out` は 20,000 バイトの入力では exit 0、
+   100,000 バイトと 740,000 バイトでは exit 124（`./pipex_bonus` も同じ）。
    正しくは全プロセスを先に fork してから一括で待つべきですが、**その修正は入れていません。**
 2. **コマンドは PATH 上の名前でしか解決できない**
    `find_path()` が無条件に `dir + "/" + cmd` を連結するため、`/bin/cat` は
@@ -137,7 +137,8 @@ bonus はコマンド数分の pipe を配列で先に確保しません。`chil
    `ft_strncmp(line, limiter, ft_strlen(limiter))` で判定しているため、LIMITER が `EOF` のとき
    `EOFX` の行も終端として扱われます。
 5. **引数エラーでも終了ステータスは 0**
-   bonus の `usage()` が `exit(EXIT_SUCCESS)` を呼ぶためです。
+   mandatory は `main()` がエラーメッセージを出したあと `return (0)` するため、
+   bonus は `usage()` が `exit(EXIT_SUCCESS)` を呼ぶためです。
 
 ---
 
