@@ -34,47 +34,84 @@ void	child_process(char *argv, char **envp)
 	close(fd[0]);
 }
 
-void	here_doc_child(int fd[2], char *limiter)
+static char	*read_heredoc(char *limiter)
 {
 	char	*line;
+	char	*buf;
+	char	*tmp;
 	size_t	len;
 
-	close(fd[0]);
 	len = ft_strlen(limiter);
+	buf = ft_strdup("");
 	line = get_next_line(0);
-	while (line)
+	while (buf && line && !(ft_strncmp(line, limiter, len) == 0
+			&& (line[len] == '\n' || line[len] == '\0')))
 	{
-		if (ft_strncmp(line, limiter, len) == 0
-			&& (line[len] == '\n' || line[len] == '\0'))
-		{
-			free(line);
-			break ;
-		}
-		write(fd[1], line, ft_strlen(line));
+		tmp = ft_strjoin(buf, line);
+		free(buf);
 		free(line);
+		buf = tmp;
 		line = get_next_line(0);
 	}
-	close(fd[1]);
-	exit(EXIT_SUCCESS);
+	free(line);
+	if (!buf)
+		error();
+	return (buf);
 }
 
 void	here_doc(char *limiter, int argc)
 {
-	pid_t	reader;
+	pid_t	writer;
 	int		fd[2];
+	char	*buf;
 
 	if (argc < 6)
 		usage();
+	buf = read_heredoc(limiter);
 	if (pipe(fd) == -1)
 		error();
-	reader = fork();
-	if (reader == -1)
+	writer = fork();
+	if (writer == -1)
 		error();
-	if (reader == 0)
-		here_doc_child(fd, limiter);
+	if (writer == 0)
+	{
+		close(fd[0]);
+		write(fd[1], buf, ft_strlen(buf));
+		close(fd[1]);
+		free(buf);
+		exit(EXIT_SUCCESS);
+	}
+	free(buf);
 	close(fd[1]);
 	dup2(fd[0], STDIN_FILENO);
 	close(fd[0]);
+}
+
+static int	run_last(char *argv, char **envp, int fileout)
+{
+	pid_t	pid;
+	int		status;
+
+	pid = fork();
+	if (pid == -1)
+		error();
+	if (pid == 0)
+	{
+		dup2(fileout, STDOUT_FILENO);
+		close(fileout);
+		execute(argv, envp);
+	}
+	close(fileout);
+	close(STDIN_FILENO);
+	status = 0;
+	waitpid(pid, &status, 0);
+	while (wait(NULL) > 0)
+		;
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+	if (WIFSIGNALED(status))
+		return (128 + WTERMSIG(status));
+	return (EXIT_FAILURE);
 }
 
 int	main(int argc, char **argv, char **envp)
@@ -97,11 +134,11 @@ int	main(int argc, char **argv, char **envp)
 			fileout = open_file(argv[argc - 1], 1);
 			filein = open_file(argv[1], 2);
 			dup2(filein, STDIN_FILENO);
+			close(filein);
 		}
 		while (i < argc - 2)
 			child_process(argv[i++], envp);
-		dup2(fileout, STDOUT_FILENO);
-		execute(argv[argc - 2], envp);
+		return (run_last(argv[argc - 2], envp, fileout));
 	}
 	usage();
 }

@@ -20,6 +20,8 @@ ok() { PASS=$((PASS + 1)); printf '  \033[32mOK\033[0m   %s\n' "$1"; }
 ng() { FAIL=$((FAIL + 1)); printf '  \033[31mFAIL\033[0m %s\n' "$1"; }
 
 # expect_eq <name> <expected> <actual>
+now_ms() { date +%s%3N; }
+
 expect_eq() {
 	if [ "$2" = "$3" ]; then ok "$1"; else ng "$1 (expected '$2', got '$3')"; fi
 }
@@ -85,9 +87,47 @@ if [ -x "$BONUS" ]; then
 		"$(printf 'existing\na\nEOFX\nb')" "$(cat hd_out)"
 	expect_eq "here_doc: exit status 0" 0 "$rc"
 
+	# stdin を読まないコマンドで確認する（cat cat では二重実行を検出できない）
 	rm -f hd_out2
-	printf 'only\n' | timeout 10 "$BONUS" here_doc EOF cat cat hd_out2; rc=$?
-	expect_eq "here_doc: EOF without limiter runs pipeline once" "only" "$(cat hd_out2)"
+	printf 'only\n' | timeout 10 "$BONUS" here_doc EOF "echo once" cat hd_out2; rc=$?
+	expect_eq "here_doc: EOF without limiter runs pipeline once" "once" "$(cat hd_out2)"
+	expect_eq "here_doc: EOF without limiter: exit status 0" 0 "$rc"
+
+	# bash の `<<` と同様、stdin を使わないコマンドでも LIMITER まで読み切ってから終了する
+	rm -f hd_out3
+	t0=$(now_ms)
+	# pipex_bonus 自身の終了時刻・出力を記録する（パイプライン全体の終了は待たない）
+	(sleep 2; printf 'x\nEND\n') | {
+		timeout 10 "$BONUS" here_doc END "echo hi" cat hd_out3
+		echo "$? $(now_ms)" > hd_res; cat hd_out3 > hd_snap 2>/dev/null; }
+	read -r rc t1 < hd_res
+	el=$(( t1 - t0 ))
+	expect_eq "here_doc: waits for LIMITER even if commands ignore stdin" 1 "$([ "$el" -ge 1800 ] && echo 1 || echo "0 (${el}ms)")"
+	expect_eq "here_doc: output written before exit" "hi" "$(cat hd_snap)"
+	expect_eq "here_doc: waits for LIMITER: exit status 0" 0 "$rc"
+
+	rm -f out
+	timeout 10 "$BONUS" here_doc END cat "wc -c" out < <(cat bigfile; printf "\nEND\n"); rc=$?
+	expect_eq "here_doc: large input (> pipe buffer) does not deadlock" 0 "$rc"
+	expect_eq "here_doc: large input byte count" "$(( $(wc -c < bigfile) + 1 ))" "$(cat out)"
+
+	rm -f out
+	timeout 10 "$BONUS" here_doc END "echo hi" cat out < <(cat bigfile; printf "\nEND\n"); rc=$?
+	expect_eq "here_doc: large input unread by commands does not hang" 0 "$rc"
+	expect_eq "here_doc: large input unread: output" "hi" "$(cat out)"
+
+	# 途中のコマンドも全て待ってから終了する（bash: < infile sleep 2 | ls > out）
+	t0=$(now_ms)
+	timeout 10 "$BONUS" infile "sleep 2" ls out; rc=$?
+	el=$(( $(now_ms) - t0 ))
+	expect_eq "waits for intermediate commands (sleep 2 | ls)" 1 "$([ "$el" -ge 1800 ] && echo 1 || echo "0 (${el}ms)")"
+	expect_eq "sleep 2 | ls: exit status 0" 0 "$rc"
+
+	"$BONUS" infile cat false out; rc=$?
+	expect_eq "bonus: exit status of last command propagated" 1 "$rc"
+
+	"$BONUS" infile cat cat nosuchcmd_xyz out 2>/dev/null; rc=$?
+	expect_eq "bonus: last command not found -> 127" 127 "$rc"
 
 	"$BONUS" infile cat 2>/dev/null >/dev/null; rc=$?
 	expect_eq "bonus: bad argument count -> non-zero" 1 "$rc"
