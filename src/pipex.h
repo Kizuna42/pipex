@@ -30,5 +30,6 @@ void	execute(char *argv, char **envp);
 /* Bonus functions */
 int		open_file(char *argv, int i);
 void	usage(void);
+char	*read_heredoc(char *limiter, size_t *len);
 
 #endif

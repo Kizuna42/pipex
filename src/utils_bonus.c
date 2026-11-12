@@ -36,3 +36,56 @@ int	open_file(char *argv, int i)
 		error();
 	return (file);
 }
+
+static char	*hd_append(char *buf, size_t *len, size_t *cap, char *line)
+{
+	size_t	n;
+	char	*tmp;
+
+	n = ft_strlen(line);
+	if (*len + n + 1 > *cap)
+	{
+		while (*len + n + 1 > *cap)
+			*cap *= 2;
+		tmp = malloc(*cap);
+		if (tmp)
+			ft_memcpy(tmp, buf, *len);
+		free(buf);
+		buf = tmp;
+	}
+	if (buf)
+	{
+		ft_memcpy(buf + *len, line, n);
+		*len += n;
+		buf[*len] = '\0';
+	}
+	free(line);
+	return (buf);
+}
+
+char	*read_heredoc(char *limiter, size_t *len)
+{
+	char	*line;
+	char	*buf;
+	size_t	cap;
+	size_t	lim;
+
+	lim = ft_strlen(limiter);
+	cap = 4096;
+	*len = 0;
+	buf = malloc(cap);
+	if (!buf)
+		error();
+	buf[0] = '\0';
+	line = get_next_line(0);
+	while (buf && line && !(ft_strncmp(line, limiter, lim) == 0
+			&& (line[lim] == '\n' || line[lim] == '\0')))
+	{
+		buf = hd_append(buf, len, &cap, line);
+		line = get_next_line(0);
+	}
+	free(line);
+	if (!buf)
+		error();
+	return (buf);
+}
