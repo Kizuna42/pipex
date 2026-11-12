@@ -1,0 +1,4 @@
+*.o
+*.a
+pipex
+pipex_bonus

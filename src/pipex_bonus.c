@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/04 16:25:40 by kizuna            #+#    #+#             */
-/*   Updated: 2025/05/04 19:45:35 by kizuna           ###   ########.fr       */
+/*   Updated: 2026/11/12 12:00:00 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,33 +26,36 @@ void	child_process(char *argv, char **envp)
 	{
 		close(fd[0]);
 		dup2(fd[1], STDOUT_FILENO);
+		close(fd[1]);
 		execute(argv, envp);
 	}
-	else
-	{
-		close(fd[1]);
-		dup2(fd[0], STDIN_FILENO);
-		waitpid(pid, NULL, 0);
-	}
+	close(fd[1]);
+	dup2(fd[0], STDIN_FILENO);
+	close(fd[0]);
 }
 
 void	here_doc_child(int fd[2], char *limiter)
 {
 	char	*line;
+	size_t	len;
 
 	close(fd[0]);
+	len = ft_strlen(limiter);
 	line = get_next_line(0);
 	while (line)
 	{
-		if (ft_strncmp(line, limiter, ft_strlen(limiter)) == 0)
+		if (ft_strncmp(line, limiter, len) == 0
+			&& (line[len] == '\n' || line[len] == '\0'))
 		{
 			free(line);
-			exit(EXIT_SUCCESS);
+			break ;
 		}
 		write(fd[1], line, ft_strlen(line));
 		free(line);
 		line = get_next_line(0);
 	}
+	close(fd[1]);
+	exit(EXIT_SUCCESS);
 }
 
 void	here_doc(char *limiter, int argc)
@@ -65,14 +68,13 @@ void	here_doc(char *limiter, int argc)
 	if (pipe(fd) == -1)
 		error();
 	reader = fork();
+	if (reader == -1)
+		error();
 	if (reader == 0)
 		here_doc_child(fd, limiter);
-	else
-	{
-		close(fd[1]);
-		dup2(fd[0], STDIN_FILENO);
-		wait(NULL);
-	}
+	close(fd[1]);
+	dup2(fd[0], STDIN_FILENO);
+	close(fd[0]);
 }
 
 int	main(int argc, char **argv, char **envp)
@@ -83,7 +85,7 @@ int	main(int argc, char **argv, char **envp)
 
 	if (argc >= 5)
 	{
-		if (ft_strncmp(argv[1], "here_doc", 8) == 0)
+		if (ft_strcmp(argv[1], "here_doc") == 0)
 		{
 			i = 3;
 			fileout = open_file(argv[argc - 1], 0);

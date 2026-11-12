@@ -6,39 +6,63 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/04 16:25:16 by kizuna            #+#    #+#             */
-/*   Updated: 2025/05/04 19:46:25 by kizuna           ###   ########.fr       */
+/*   Updated: 2026/11/12 12:00:00 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
+static void	free_split(char **arr)
+{
+	int	i;
+
+	if (!arr)
+		return ;
+	i = 0;
+	while (arr[i])
+		free(arr[i++]);
+	free(arr);
+}
+
+static char	**get_paths(char **envp)
+{
+	int	i;
+
+	i = 0;
+	while (envp && envp[i])
+	{
+		if (ft_strncmp(envp[i], "PATH=", 5) == 0)
+			return (ft_split(envp[i] + 5, ':'));
+		i++;
+	}
+	return (NULL);
+}
+
 char	*find_path(char *cmd, char **envp)
 {
 	char	**paths;
 	char	*path;
-	int		i;
 	char	*part_path;
+	int		i;
 
-	i = 0;
-	while (ft_strnstr(envp[i], "PATH", 4) == 0)
-		i++;
-	paths = ft_split(envp[i] + 5, ':');
-	i = 0;
-	while (paths[i])
+	if (ft_strchr(cmd, '/'))
+		return (ft_strdup(cmd));
+	paths = get_paths(envp);
+	i = -1;
+	while (paths && paths[++i])
 	{
 		part_path = ft_strjoin(paths[i], "/");
 		path = ft_strjoin(part_path, cmd);
 		free(part_path);
-		if (access(path, F_OK) == 0)
+		if (path && access(path, X_OK) == 0)
+		{
+			free_split(paths);
 			return (path);
+		}
 		free(path);
-		i++;
 	}
-	i = -1;
-	while (paths[++i])
-		free(paths[i]);
-	free(paths);
-	return (0);
+	free_split(paths);
+	return (NULL);
 }
 
 void	error(void)
@@ -50,19 +74,27 @@ void	error(void)
 void	execute(char *argv, char **envp)
 {
 	char	**cmd;
-	int		i;
 	char	*path;
+	int		status;
 
-	i = -1;
 	cmd = ft_split(argv, ' ');
-	path = find_path(cmd[0], envp);
+	path = NULL;
+	if (cmd && cmd[0])
+		path = find_path(cmd[0], envp);
 	if (!path)
 	{
-		while (cmd[++i])
-			free(cmd[i]);
-		free(cmd);
-		error();
+		ft_putstr_fd("\033[31mError: command not found: ", 2);
+		ft_putstr_fd(argv, 2);
+		ft_putstr_fd("\n\033[0m", 2);
+		free_split(cmd);
+		exit(127);
 	}
-	if (execve(path, cmd, envp) == -1)
-		error();
+	execve(path, cmd, envp);
+	status = 126;
+	if (errno == ENOENT)
+		status = 127;
+	perror("\033[31mError");
+	free(path);
+	free_split(cmd);
+	exit(status);
 }
