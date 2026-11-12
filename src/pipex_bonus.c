@@ -63,26 +63,8 @@ void	here_doc(char *limiter, int argc)
 	close(fd[0]);
 }
 
-static int	run_last(char *argv, char **envp, int fileout)
+static int	exit_code(int status)
 {
-	pid_t	pid;
-	int		status;
-
-	pid = fork();
-	if (pid == -1)
-		error();
-	if (pid == 0)
-	{
-		dup2(fileout, STDOUT_FILENO);
-		close(fileout);
-		execute(argv, envp);
-	}
-	close(fileout);
-	close(STDIN_FILENO);
-	status = 0;
-	waitpid(pid, &status, 0);
-	while (wait(NULL) > 0)
-		;
 	if (WIFEXITED(status))
 		return (WEXITSTATUS(status));
 	if (WIFSIGNALED(status))
@@ -90,10 +72,38 @@ static int	run_last(char *argv, char **envp, int fileout)
 	return (EXIT_FAILURE);
 }
 
+static int	run_last(char *argv, char **envp, int fileout)
+{
+	pid_t	pid;
+	int		status;
+
+	status = 0;
+	pid = -1;
+	if (fileout != -1)
+		pid = fork();
+	if (fileout != -1 && pid == -1)
+		error();
+	if (pid == 0)
+	{
+		dup2(fileout, STDOUT_FILENO);
+		close(fileout);
+		execute(argv, envp);
+	}
+	if (fileout != -1)
+		close(fileout);
+	close(STDIN_FILENO);
+	if (pid > 0)
+		waitpid(pid, &status, 0);
+	while (wait(NULL) > 0)
+		;
+	if (pid < 0)
+		return (EXIT_FAILURE);
+	return (exit_code(status));
+}
+
 int	main(int argc, char **argv, char **envp)
 {
 	int	i;
-	int	filein;
 	int	fileout;
 
 	if (argc >= 5)
@@ -106,11 +116,8 @@ int	main(int argc, char **argv, char **envp)
 		}
 		else
 		{
-			i = 2;
 			fileout = open_file(argv[argc - 1], 1);
-			filein = open_file(argv[1], 2);
-			dup2(filein, STDIN_FILENO);
-			close(filein);
+			i = setup_infile(argv[1]);
 		}
 		while (i < argc - 2)
 			child_process(argv[i++], envp);

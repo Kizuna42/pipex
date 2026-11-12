@@ -137,6 +137,30 @@ if [ -x "$BONUS" ]; then
 	expect_eq "waits for intermediate commands (sleep 2 | ls)" 1 "$([ "$el" -ge 1800 ] && echo 1 || echo "0 (${el}ms)")"
 	expect_eq "sleep 2 | ls: exit status 0" 0 "$rc"
 
+	# シェル（< missing cmd1 | cmd2 > out）と同様、infile が開けなくても後続は続行する
+	rm -f out
+	"$BONUS" no_such_infile cat "wc -l" out 2>err; rc=$?
+	expect_eq "bonus: missing infile: second command still runs" "0" "$(tr -d ' ' < out)"
+	expect_eq "bonus: missing infile: exit status 0" 0 "$rc"
+	expect_eq "bonus: missing infile: error message" 1 "$(grep -c no_such_infile err)"
+
+	rm -f out
+	"$BONUS" no_such_infile cat cat "wc -l" out 2>/dev/null; rc=$?
+	expect_eq "bonus: missing infile (3 cmds): pipeline continues" "0" "$(tr -d ' ' < out)"
+	expect_eq "bonus: missing infile (3 cmds): exit status 0" 0 "$rc"
+
+	rm -f out side
+	"$BONUS" no_such_infile "touch side" "wc -l" out 2>/dev/null
+	expect_eq "bonus: missing infile: first command is not started" 0 "$([ -e side ] && echo 1 || echo 0)"
+
+	"$BONUS" no_such_infile cat false out 2>/dev/null; rc=$?
+	expect_eq "bonus: missing infile: last status propagated" 1 "$rc"
+
+	rm -f side
+	"$BONUS" infile cat "touch side" no_such_dir/out 2>/dev/null; rc=$?
+	expect_eq "bonus: unwritable outfile -> 1" 1 "$rc"
+	expect_eq "bonus: unwritable outfile: last command is not started" 0 "$([ -e side ] && echo 1 || echo 0)"
+
 	"$BONUS" infile cat false out; rc=$?
 	expect_eq "bonus: exit status of last command propagated" 1 "$rc"
 
