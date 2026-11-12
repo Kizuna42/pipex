@@ -31,5 +31,6 @@ void	execute(char *argv, char **envp);
 int		open_file(char *argv, int i);
 void	usage(void);
 char	*read_heredoc(char *limiter, size_t *len);
+int		setup_infile(char *path);
 
 #endif

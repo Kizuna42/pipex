@@ -1,0 +1,3 @@
+[submodule "pipex-tester"]
+	path = pipex-tester
+	url = https://github.com/vfurmane/pipex-tester.git

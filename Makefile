@@ -13,7 +13,8 @@
 NAME = pipex
 NAME_BONUS = pipex_bonus
 
-CFLAGS = -Wall -Wextra -Werror -fsanitize=address
+CFLAGS = -Wall -Wextra -Werror $(EXTRA_CFLAGS)
+ASAN_FLAGS = -g -fsanitize=address
 RM = rm -rf
 
 SRCS = src/pipex.c src/utils.c
@@ -49,4 +50,11 @@ re: fclean all
 test: all bonus
 	./tests/run_tests.sh
 
-.PHONY: all clean fclean re bonus test
+# AddressSanitizer 付きビルド（提出用の通常ビルドには含めない）
+asan: fclean
+	$(MAKE) all bonus EXTRA_CFLAGS="$(ASAN_FLAGS)"
+
+asan_test: asan
+	./tests/run_tests.sh
+
+.PHONY: all clean fclean re bonus test asan asan_test

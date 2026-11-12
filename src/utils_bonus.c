@@ -33,8 +33,28 @@ int	open_file(char *argv, int i)
 	else if (i == 2)
 		file = open(argv, O_RDONLY);
 	if (file == -1)
-		error();
+		perror(argv);
 	return (file);
+}
+
+/* infile が開けない場合はシェル同様に最初のコマンドを起動せず空入力で続行 */
+int	setup_infile(char *path)
+{
+	int	filein;
+	int	first;
+
+	first = 2;
+	filein = open_file(path, 2);
+	if (filein == -1)
+	{
+		first = 3;
+		filein = open("/dev/null", O_RDONLY);
+		if (filein == -1)
+			error();
+	}
+	dup2(filein, STDIN_FILENO);
+	close(filein);
+	return (first);
 }
 
 static char	*hd_append(char *buf, size_t *len, size_t *cap, char *line)
