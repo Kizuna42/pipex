@@ -116,6 +116,20 @@ if [ -x "$BONUS" ]; then
 	expect_eq "here_doc: large input unread by commands does not hang" 0 "$rc"
 	expect_eq "here_doc: large input unread: output" "hi" "$(cat out)"
 
+	# here_doc の蓄積は線形時間で行う（行ごとの strjoin による二乗時間の回帰検出）
+	rm -f out
+	t0=$(now_ms)
+	{ seq 100000; echo END; } | timeout 5 "$BONUS" here_doc END cat "wc -l" out; rc=$?
+	el=$(( $(now_ms) - t0 ))
+	expect_eq "here_doc: 100000 lines finish within 5s (${el}ms)" 0 "$rc"
+	expect_eq "here_doc: 100000 lines line count" 100000 "$(tr -d ' ' < out)"
+
+	rm -f out
+	head -c 1200000 /dev/zero | tr '\0' 'b' | fold -w 99 > hd_mb; echo >> hd_mb
+	{ cat hd_mb; echo END; } | timeout 5 "$BONUS" here_doc END cat "wc -c" out; rc=$?
+	expect_eq "here_doc: >1MB input finishes within 5s" 0 "$rc"
+	expect_eq "here_doc: >1MB input byte count" "$(wc -c < hd_mb)" "$(tr -d ' ' < out)"
+
 	# 途中のコマンドも全て待ってから終了する（bash: < infile sleep 2 | ls > out）
 	t0=$(now_ms)
 	timeout 10 "$BONUS" infile "sleep 2" ls out; rc=$?

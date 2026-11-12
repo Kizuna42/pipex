@@ -34,40 +34,16 @@ void	child_process(char *argv, char **envp)
 	close(fd[0]);
 }
 
-static char	*read_heredoc(char *limiter)
-{
-	char	*line;
-	char	*buf;
-	char	*tmp;
-	size_t	len;
-
-	len = ft_strlen(limiter);
-	buf = ft_strdup("");
-	line = get_next_line(0);
-	while (buf && line && !(ft_strncmp(line, limiter, len) == 0
-			&& (line[len] == '\n' || line[len] == '\0')))
-	{
-		tmp = ft_strjoin(buf, line);
-		free(buf);
-		free(line);
-		buf = tmp;
-		line = get_next_line(0);
-	}
-	free(line);
-	if (!buf)
-		error();
-	return (buf);
-}
-
 void	here_doc(char *limiter, int argc)
 {
 	pid_t	writer;
 	int		fd[2];
 	char	*buf;
+	size_t	len;
 
 	if (argc < 6)
 		usage();
-	buf = read_heredoc(limiter);
+	buf = read_heredoc(limiter, &len);
 	if (pipe(fd) == -1)
 		error();
 	writer = fork();
@@ -76,7 +52,7 @@ void	here_doc(char *limiter, int argc)
 	if (writer == 0)
 	{
 		close(fd[0]);
-		write(fd[1], buf, ft_strlen(buf));
+		write(fd[1], buf, len);
 		close(fd[1]);
 		free(buf);
 		exit(EXIT_SUCCESS);
