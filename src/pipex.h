@@ -6,7 +6,7 @@
 /*   By: kizuna <kizuna@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/04 16:25:29 by kizuna            #+#    #+#             */
-/*   Updated: 2025/05/04 19:42:38 by kizuna           ###   ########.fr       */
+/*   Updated: 2026/11/12 12:00:00 by kizuna           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 # include <stdio.h>
 # include <sys/wait.h>
 # include <fcntl.h>
+# include <errno.h>
 # include "../libft/libft.h"
 
 /* Mandatory functions */
